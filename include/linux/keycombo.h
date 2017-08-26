@@ -23,6 +23,10 @@
 
 #define KEYCOMBO_NAME "keycombo"
 
+#define KEY_LOGD(fmt, args...) printk(KERN_DEBUG "[KEY] "fmt, ##args)
+#define KEY_LOGI(fmt, args...) printk(KERN_INFO "[KEY] "fmt, ##args)
+#define KEY_LOGE(fmt, args...) printk(KERN_ERR "[KEY][ERR] "fmt, ##args)
+
 /*
  * if key_down_fn and key_up_fn are both present, you are guaranteed that
  * key_down_fn will return before key_up_fn is called, and that key_up_fn
