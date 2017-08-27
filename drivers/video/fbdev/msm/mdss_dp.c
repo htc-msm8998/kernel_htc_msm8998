@@ -30,6 +30,7 @@
 #include <linux/spinlock_types.h>
 #include <linux/kthread.h>
 #include <linux/msm_ext_display.h>
+#include <linux/dma-buf.h>
 
 #include "mdss.h"
 #include "mdss_dp.h"
@@ -921,7 +922,6 @@ static int mdss_dp_parse_gpio_params(struct platform_device *pdev,
 	if (!gpio_is_valid(dp->aux_en_gpio)) {
 		pr_err("%d, Aux_en gpio not specified\n",
 					__LINE__);
-		return -EINVAL;
 	}
 
 	dp->aux_sel_gpio = of_get_named_gpio(
@@ -931,7 +931,6 @@ static int mdss_dp_parse_gpio_params(struct platform_device *pdev,
 	if (!gpio_is_valid(dp->aux_sel_gpio)) {
 		pr_err("%d, Aux_sel gpio not specified\n",
 					__LINE__);
-		return -EINVAL;
 	}
 
 	dp->usbplug_cc_gpio = of_get_named_gpio(
@@ -3434,6 +3433,7 @@ static void mdss_dp_event_cleanup(struct mdss_dp_drv_pdata *dp)
 static int mdss_dp_event_setup(struct mdss_dp_drv_pdata *dp)
 {
 
+
 	init_waitqueue_head(&dp->dp_event.event_q);
 	spin_lock_init(&dp->dp_event.event_lock);
 
@@ -3963,6 +3963,11 @@ static int mdss_dp_process_hpd_irq_high(struct mdss_dp_drv_pdata *dp)
 	if (!ret)
 		goto exit;
 
+	if (mdss_dp_is_ds_bridge_sink_count_zero(dp)) {
+		pr_debug("sink count is zero, nothing to do\n");
+		goto exit;
+	}
+
 	ret = mdss_dp_process_link_training_request(dp);
 	if (!ret)
 		goto exit;
@@ -4065,6 +4070,12 @@ static void mdss_dp_process_attention(struct mdss_dp_drv_pdata *dp_drv)
 {
 	if (dp_drv->alt_mode.dp_status.hpd_irq) {
 		pr_debug("Attention: hpd_irq high\n");
+
+		if(!dp_drv->dp_initialized){
+
+			pr_err("return due to DP already de-initialized\n");
+			return;
+		}
 
 		if (dp_is_hdcp_enabled(dp_drv) && dp_drv->hdcp.ops->cp_irq) {
 			if (!dp_drv->hdcp.ops->cp_irq(dp_drv->hdcp.data))
@@ -4183,7 +4194,6 @@ static void mdss_dp_handle_attention(struct mdss_dp_drv_pdata *dp)
 		}
 		pr_debug("done processing item %d in the list\n", i);
 	};
-
 exit:
 	pr_debug("exit\n");
 }
@@ -4338,7 +4348,6 @@ static int mdss_dp_probe(struct platform_device *pdev)
 	if (ret) {
 		pr_err("pinctrl init failed, ret=%d\n",
 						ret);
-		goto probe_err;
 	}
 
 	ret = mdss_dp_parse_gpio_params(pdev, dp_drv);
