@@ -107,7 +107,7 @@
 			<10 0x080C0000 0x20000>,
 			<11 0x080E0000 0x20000>;
 		sensorhub,num-shared-flash-banks = <6>;
-		sensorhub,gesture-vibrate-ms = <25>;
+		sensorhub,gesture-vibrate-ms = <0>;
 
 		pinctrl-names = "default";
 		pinctrl-0 = <&sensorhub_ctrl_active &sensorhub_handshaking_active>;
