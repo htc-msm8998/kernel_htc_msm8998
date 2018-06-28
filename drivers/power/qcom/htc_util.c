@@ -765,8 +765,6 @@ static void htc_show_sensor_temp(void)
 extern void htc_print_pon_boot_reason(void);
 
 extern void dump_vm_events_counter(void);
-extern void htc_lmh_stat_show(void);
-extern void htc_lmh_stat_clear(void);
 static void htc_pm_monitor_work_func(struct work_struct *work)
 {
 	struct _htc_kernel_top *ktop = container_of(work, struct _htc_kernel_top,
@@ -788,10 +786,6 @@ static void htc_pm_monitor_work_func(struct work_struct *work)
 
   	/* Show interesting sensor temperature */
 	htc_show_sensor_temp();
-
-	/* Show lmh status*/
-	htc_lmh_stat_show();
-	htc_lmh_stat_clear();
 
 	/* Show interrupt status */
 	htc_show_interrupts();
